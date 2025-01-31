@@ -215,3 +215,19 @@ export function getDocumentTimestampByIndex(
 
   return documents[index].createdAt;
 }
+
+export const truncateText = (text = "", count = 21): string => {
+  if (text?.length <= count) {
+    return text;
+  } else {
+    if (text.substring(0, 2) === "0x" && count > 5) {
+      return `0x${truncateText(text.substring(2), count - 2)}`
+
+    }
+    const startCount = Math.ceil((count - 3) / 2);
+    const endCount = Math.floor((count - 3) / 2);
+    const start = text.substring(0, startCount);
+    const end = text.substring(text.length - endCount);
+    return `${start}...${end}`;
+  }
+};

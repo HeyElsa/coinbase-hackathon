@@ -4,6 +4,10 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 
 import './globals.css';
+import { Providers } from './providers';
+import { cookieToInitialState } from 'wagmi';
+import { getConfig } from '@/wagmi';
+import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://chat.vercel.ai'),
@@ -40,6 +44,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialState = cookieToInitialState(
+    getConfig(),
+    (await headers()).get('cookie'),
+  );
   return (
     <html
       lang="en"
@@ -64,7 +72,9 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <Toaster position="top-center" />
-          {children}
+          <Providers initialState={initialState}>
+            {children}
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

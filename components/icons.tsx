@@ -1119,3 +1119,51 @@ export const FullscreenIcon = ({ size = 16 }: { size?: number }) => (
     ></path>
   </svg>
 );
+
+export function IconCoinbase({ className, ...props }: React.ComponentProps<"svg">) {
+  return (
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <g clipPath="url(#clip0_654_2135)">
+        <path
+          d="M16 0H0V16H16V0Z"
+          fill="#0052FF"
+          style={{
+            fill: "#0052FF",
+            fillOpacity: 1,
+          }}
+        />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M2.375 8C2.375 11.1066 4.89339 13.625 8 13.625C11.1066 13.625 13.625 11.1066 13.625 8C13.625 4.89339 11.1066 2.375 8 2.375C4.89339 2.375 2.375 4.89339 2.375 8ZM6.5625 6.1875C6.35539 6.1875 6.1875 6.35539 6.1875 6.5625V9.4375C6.1875 9.64461 6.35539 9.8125 6.5625 9.8125H9.4375C9.64461 9.8125 9.8125 9.64461 9.8125 9.4375V6.5625C9.8125 6.35539 9.64461 6.1875 9.4375 6.1875H6.5625Z"
+          fill="white"
+          style={{
+            fill: "white",
+            fillOpacity: 1,
+          }}
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_654_2135">
+          <rect
+            width={16}
+            height={16}
+            rx={8}
+            fill="white"
+            style={{
+              fill: "white",
+              fillOpacity: 1,
+            }}
+          />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
