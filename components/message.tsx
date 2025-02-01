@@ -19,6 +19,7 @@ import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
+import { SnipeMemeCoins } from './crypto/snipe-meme-coins';
 
 const PurePreviewMessage = ({
   chatId,
@@ -152,6 +153,11 @@ const PurePreviewMessage = ({
                             type="request-suggestions"
                             result={result}
                             isReadonly={isReadonly}
+                          />
+                        ) : toolName === 'snipeMemeCoins' ? (
+                          <SnipeMemeCoins
+                            budget={result.budget}
+                            requestId={result.requestId}
                           />
                         ) : (
                           <pre>{JSON.stringify(result, null, 2)}</pre>

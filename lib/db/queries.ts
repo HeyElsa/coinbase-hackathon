@@ -15,6 +15,7 @@ import {
   type Message,
   message,
   vote,
+  backgroundTask,
 } from './schema';
 import { BlockKind } from '@/components/block';
 
@@ -342,6 +343,33 @@ export async function updateChatVisiblityById({
     return await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
   } catch (error) {
     console.error('Failed to update chat visibility in database');
+    throw error;
+  }
+}
+
+export async function addBackgroundTask({
+  id,
+  createdAt,
+  type,
+  payload,
+  userId,
+}: {
+  id: string;
+  createdAt: Date;
+  type: 'snipeMemeCoins';
+  payload: string;
+  userId: string;
+}) {
+  try {
+    return await db.insert(backgroundTask).values({
+      id,
+      createdAt,
+      type,
+      payload,
+      userId,
+    });
+  } catch (error) {
+    console.error('Failed to add background task in database', error);
     throw error;
   }
 }

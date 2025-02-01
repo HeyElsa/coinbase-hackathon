@@ -113,3 +113,20 @@ export const suggestion = pgTable(
 );
 
 export type Suggestion = InferSelectModel<typeof suggestion>;
+
+export const backgroundTask = pgTable('BackgroundTask', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  createdAt: timestamp('createdAt').notNull(),
+  type: varchar('type', { enum: ['snipeMemeCoins'] })
+    .notNull(),
+  payload: text('payload'),
+  userId: uuid('userId')
+    .notNull()
+    .references(() => user.id),
+  status: varchar('status', { enum: ['pending', 'running', 'success', 'failed'] })
+    .notNull()
+    .default('pending'),
+  log: varchar('log')
+});
+
+export type BackgroundTask = InferSelectModel<typeof backgroundTask>;

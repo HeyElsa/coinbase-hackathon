@@ -26,6 +26,7 @@ import { createDocument } from '@/lib/ai/tools/create-document';
 import { updateDocument } from '@/lib/ai/tools/update-document';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
+import { snipeMemeCoins } from '@/lib/ai/tools/crypto/snipe-meme-coins';
 
 export const maxDuration = 60;
 
@@ -33,7 +34,8 @@ type AllowedTools =
   | 'createDocument'
   | 'updateDocument'
   | 'requestSuggestions'
-  | 'getWeather';
+  | 'getWeather'
+  | 'snipeMemeCoins';
 
 const blocksTools: AllowedTools[] = [
   'createDocument',
@@ -42,7 +44,8 @@ const blocksTools: AllowedTools[] = [
 ];
 
 const weatherTools: AllowedTools[] = ['getWeather'];
-const allTools: AllowedTools[] = [...blocksTools, ...weatherTools];
+const cryptoTools: AllowedTools[] = ['snipeMemeCoins'];
+const allTools: AllowedTools[] = [...blocksTools, ...weatherTools, ...cryptoTools];
 
 export async function POST(request: Request) {
   const {
@@ -100,6 +103,7 @@ export async function POST(request: Request) {
             dataStream,
             model,
           }),
+          snipeMemeCoins,
         },
         onFinish: async ({ response }) => {
           if (session.user?.id) {
