@@ -32,7 +32,24 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
         const spendPermissionManagerAddress = '0xf85210B21cC50302F477BA56686d2019dC9b67Ad';
 
         const memeCoins = await getLatestMemeCoins();
-        const baseMemeCoins = memeCoins.filter((coin) => (coin.chainId === 'base'));
+        // const baseMemeCoins = memeCoins.filter((coin) => (coin.chainId === 'base'));
+        const baseMemeCoins: typeof memeCoins = [
+            {
+                chainId: 'base',
+                tokenAddress: '0x81a382272Bd2BeC1f3F9FDAb5763a500Cbd8EBAD',
+                symbol: 'DEEPSEEK',
+            },
+            {
+                chainId: 'base',
+                tokenAddress: '0x23dD3Ce6161422622E773E13dAC2781C7f990D45',
+                symbol: 'POT',
+            },
+            {
+                chainId: 'base',
+                tokenAddress: '0x52b492a33E447Cdb854c7FC19F1e57E8BfA1777D',
+                symbol: 'PEPE',
+            },
+        ]
         if (baseMemeCoins.length == 0) {
             console.info("No new meme coins found for trade.");
             return false;
@@ -60,7 +77,7 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
             account: spender
         })
         console.log(approveHash);
-        log += "Approve Hash: " + approveHash + ".";
+        log += "Approve Hash: " + approveHash + ";";
         await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
 
         await new Promise(r => setTimeout(r, 10000));
@@ -76,16 +93,18 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
             account: spender
         });
         console.log(spendHash);
-        log += "Spend Hash: " + spendHash + ".";
+        log += "Spend Hash: " + spendHash + ";";
         await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
+
+        await new Promise(r => setTimeout(r, 5000));
+
         const selectedCoins = baseMemeCoins.slice(0, 4);
         const totalCoins = selectedCoins.length;
         const totalAllowance = parseInt(payload.allowance);
         let amountWei = parseInt((totalAllowance / totalCoins).toFixed(0));
         let remainingAllowance = totalAllowance;
         for (let index = 0; index < totalCoins; index++) {
-            // const toAssetId = selectedCoins[index].tokenAddress;
-            const toAssetId = Coinbase.assets.Usdc;
+            const toAsset = selectedCoins[index];
             if (index === totalCoins - 1) {
                 amountWei = remainingAllowance;
             } else {
@@ -94,23 +113,23 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
             const trade = await spenderWallet.createTrade({
                 amount: amountWei,
                 fromAssetId: Coinbase.assets.Wei,
-                toAssetId: toAssetId,
+                toAssetId: toAsset.tokenAddress,
             });
-            log += `[${index + 1} of ${totalCoins}] Buying ${toAssetId} with ${amountWei} Wei: ` + trade.getTransaction().getTransactionHash() + ".";
+            log += `[${index + 1} of ${totalCoins}] Buying ${toAsset.symbol} with ${amountWei} Wei: ` + trade.getTransaction().getTransactionHash() + ";";
             await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
             const completedTrade = await trade.wait();
-            const toAmount = completedTrade.getToAmount();
-            log += "Completed Trade: " + toAmount + ` ${toAssetId}` + " received.";
+            const toAmount = parseInt(completedTrade.getToAmount().toString()) - 1;
+            log += "Completed Trade: " + toAmount + ` ${toAsset.symbol}` + " received" + ";";
             await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
             const transfer = await spenderWallet.createTransfer({
                 amount: toAmount,
-                assetId: toAssetId,
+                assetId: toAsset.tokenAddress,
                 destination: payload.account
             });
-            log += `Transfering ${toAmount} ${toAssetId} to ${payload.account}: ` + transfer.getTransactionHash() + ".";
+            log += `Transfering ${toAmount} ${toAsset.symbol} to ${payload.account}: ` + transfer.getTransactionHash() + ";";
             await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
             await transfer.wait();
-            log += "Completed Transfer: " + toAmount + ` ${toAssetId} to ${payload.account}.`;
+            log += "Completed Transfer: " + toAmount + ` ${toAsset.symbol} to ${payload.account}` + ";";
             await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
         }
         await updateBackgroundTaskStatus({ id: task.id, status: 'success', log });
