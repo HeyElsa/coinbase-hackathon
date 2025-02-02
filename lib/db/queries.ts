@@ -373,3 +373,16 @@ export async function addBackgroundTask({
     throw error;
   }
 }
+
+export async function getBackgroundTaskById({ id, userId }: { id: string, userId: string }) {
+  try {
+    const [ fetchedTask ] = await db
+      .select()
+      .from(backgroundTask)
+      .where(and(eq(backgroundTask.id, id), eq(backgroundTask.userId, userId)))
+    return fetchedTask;
+  } catch (error) {
+    console.error('Failed to get background task by id from database');
+    throw error;
+  }
+}

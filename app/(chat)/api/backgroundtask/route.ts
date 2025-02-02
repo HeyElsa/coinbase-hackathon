@@ -1,12 +1,34 @@
 import { auth } from '@/app/(auth)/auth';
-import { addBackgroundTask } from '@/lib/db/queries';
-import { generateUUID } from '@/lib/utils';
+import { addBackgroundTask, getBackgroundTaskById } from '@/lib/db/queries';
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+
+  if (!id) {
+    return new Response('Missing id', { status: 400 });
+  }
+
+  const session = await auth();
+
+  if (!session || !session.user) {
+    return Response.json('Unauthorized!', { status: 401 });
+  }
+
+  // biome-ignore lint: Forbidden non-null assertion.
+  const backgroundTask = await getBackgroundTaskById({ id, userId: session.user.id! });
+  if (!backgroundTask) {
+    return new Response('Not found', { status: 404 });
+  }
+  return Response.json(backgroundTask);
+}
 
 export async function POST(request: Request) {
   const {
+    id,
     type,
     payload
-  }: { type: 'snipeMemeCoins', payload: string } =
+  }: { id: string, type: 'snipeMemeCoins', payload: string } =
     await request.json();
 
   if (!payload || !type) {
@@ -20,7 +42,7 @@ export async function POST(request: Request) {
   }
 
   await addBackgroundTask({
-    id: generateUUID(),
+    id: id,
     createdAt: new Date(),
     type,
     payload,

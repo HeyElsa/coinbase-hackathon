@@ -2,20 +2,54 @@ import { useAccount, useChainId, useConnect, useSignTypedData } from "wagmi";
 import { Button } from "../ui/button";
 import { IconCoinbase } from "../icons";
 import { parseUnits } from "viem";
-import { useLocalStorage } from "usehooks-ts";
+import { useDebounceCallback, useInterval, useLocalStorage } from "usehooks-ts";
 import { toast } from "sonner";
+import useSWR from "swr";
+import { fetcher } from "@/lib/utils";
+import { BackgroundTask } from "@/lib/db/schema";
+import { useEffect, useState } from "react";
 
 type Props = {
     budget: number
     requestId: string
 }
 export function SnipeMemeCoins({ budget, requestId }: Props) {
-    const [ signature, setSignature ] = useLocalStorage<`0x${string}` | null>('sign:' + requestId, null);
+    const [signature, setSignature] = useLocalStorage<`0x${string}` | null>('sign:' + requestId, null);
     const account = useAccount();
     const { connect, connectors } = useConnect();
+    useDebounceCallback
     const chainId = useChainId();
     const { signTypedData } = useSignTypedData();
     const cbswConnector = connectors.find((c) => c.id === 'coinbaseWalletSDK');
+    const [pollInterval, setPollInterval] = useState<number | null>(null);
+
+    const {
+        data: fetchedTask,
+        mutate: mutateFetchedTask,
+    } = useSWR<BackgroundTask>(
+        signature
+            ? `/api/backgroundtask?id=${requestId}`
+            : null,
+        fetcher,
+    );
+
+    useEffect(() => {
+        mutateFetchedTask();
+    }, [signature, mutateFetchedTask]);
+
+    useInterval(mutateFetchedTask, pollInterval);
+
+    useEffect(() => {
+        if (signature && (
+            !fetchedTask ||
+            ['pending', 'running'].includes(fetchedTask.status)
+        )) {
+            setPollInterval(10000);
+        } else {
+            setPollInterval(null);
+        }
+    }, [signature, fetchedTask])
+
     function approveSpending() {
         if (!account.address) {
             throw Error("Wallet is not connected properly!");
@@ -65,29 +99,34 @@ export function SnipeMemeCoins({ budget, requestId }: Props) {
             },
         }, {
             onSuccess: async (data) => {
-                setSignature(data);
                 const result = await fetch('/api/backgroundtask', {
-                  method: 'POST',
-                  body: JSON.stringify({
-                    type: 'snipeMemeCoins',
-                    payload,
-                  }),
+                    method: 'POST',
+                    body: JSON.stringify({
+                        id: requestId,
+                        type: 'snipeMemeCoins',
+                        payload,
+                    }),
                 });
                 if (!result.ok) {
                     console.error(result);
                     toast.error('Failed to add background task');
                 } else {
                     toast.success('Task successfully registered!');
+                    setSignature(data);
                 }
             }
         });
     }
-    if (signature) {
+    if (fetchedTask) {
         return (
             <span>
-                Task successfully registered.
+                Task status: {fetchedTask.status}
             </span>
-        );
+        )
+    } else if (signature) {
+        return (
+            <span>Fetching task status...</span>
+        )
     }
     if (account.status == 'connected') {
         return (
