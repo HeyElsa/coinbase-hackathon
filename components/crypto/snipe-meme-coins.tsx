@@ -131,9 +131,15 @@ export function SnipeMemeCoins({ budget, requestId }: Props) {
     }
     if (fetchedTask) {
         return (
-            <span>
-                Task status: {fetchedTask.status}
-            </span>
+            <div>
+                <span>
+                    Task status: {fetchedTask.status}
+                </span>
+                <br />
+                <span>
+                    {fetchedTask.log?.replaceAll('.', '.\n')}
+                </span>
+            </div>
         )
     } else if (signature) {
         return (

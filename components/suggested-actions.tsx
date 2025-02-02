@@ -17,8 +17,8 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
   const suggestedActions = [
     {
       title: 'Snipe promising base meme coins',
-      label: 'in the next 24 hours using 0.01 ETH',
-      action: 'Snipe promising base meme coins in the next 24 hours using 0.01 ETH',
+      label: 'in the next 24 hours using 0.0005 ETH',
+      action: 'Snipe promising base meme coins in the next 24 hours using 0.0005 ETH',
     },
     {
       title: 'Write code to',

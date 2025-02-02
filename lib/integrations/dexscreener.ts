@@ -1,3 +1,8 @@
 export async function getLatestMemeCoins() {
-    return (await fetch(`https://api.dexscreener.com/token-profiles/latest/v1`)).json() as Promise<Array<any>>;
+    type Coin = {
+        chainId: string;
+        tokenAddress: string;
+        symbol: string;
+    }
+    return (await fetch(`https://api.dexscreener.com/token-profiles/latest/v1`)).json() as Promise<Array<Coin>>;
 }
