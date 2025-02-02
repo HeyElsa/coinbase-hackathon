@@ -16,9 +16,9 @@ interface SuggestedActionsProps {
 function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'What are the advantages',
-      label: 'of using Next.js?',
-      action: 'What are the advantages of using Next.js?',
+      title: 'Snipe promising base meme coins',
+      label: 'in the next 24 hours using 0.01 ETH',
+      action: 'Snipe promising base meme coins in the next 24 hours using 0.01 ETH',
     },
     {
       title: 'Write code to',

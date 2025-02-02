@@ -85,7 +85,7 @@ export function SnipeMemeCoins({ budget, requestId }: Props) {
     if (signature) {
         return (
             <span>
-                {signature}
+                Task successfully registered.
             </span>
         );
     }
