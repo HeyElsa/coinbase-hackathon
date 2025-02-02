@@ -386,3 +386,36 @@ export async function getBackgroundTaskById({ id, userId }: { id: string, userId
     throw error;
   }
 }
+
+export async function getAllPendingTasks() {
+  try {
+    return await db
+      .select()
+      .from(backgroundTask)
+      .where(eq(backgroundTask.status, 'pending'))
+      .orderBy(backgroundTask.createdAt)
+  } catch (error) {
+    console.error('Failed to get background task by id from database');
+    throw error;
+  }
+}
+
+export async function updateBackgroundTaskStatus({
+  id,
+  status,
+  log,
+}: {
+  id: string;
+  status: 'running' | 'success' | 'failed';
+  log: string | null;
+}) {
+  try {
+    return await db.update(backgroundTask).set({
+      status,
+      log
+    }).where(eq(backgroundTask.id, id));
+  } catch (error) {
+    console.error('Failed to update background task in database', error);
+    throw error;
+  }
+}

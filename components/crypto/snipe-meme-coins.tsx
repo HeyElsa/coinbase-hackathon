@@ -5,7 +5,7 @@ import { parseUnits } from "viem";
 import { useDebounceCallback, useInterval, useLocalStorage } from "usehooks-ts";
 import { toast } from "sonner";
 import useSWR from "swr";
-import { fetcher } from "@/lib/utils";
+import { fetcher, Payload } from "@/lib/utils";
 import { BackgroundTask } from "@/lib/db/schema";
 import { useEffect, useState } from "react";
 
@@ -57,14 +57,13 @@ export function SnipeMemeCoins({ budget, requestId }: Props) {
         const spender = process.env.NEXT_PUBLIC_SPENDER_ADDRESS as `0x${string}`;
         const token = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
         const spendPermissionManagerAddress = '0xf85210B21cC50302F477BA56686d2019dC9b67Ad';
-        const allowance = parseUnits(budget.toString(), 18);
+        const allowance = parseUnits(budget.toString(), 18).toString();
         const nowTimestamp = Math.floor(Date.now() / 1000);
         const period = 86400;
-        const payloadObj = {
-            budget: budget.toString(),
-            address: account.address,
-        };
-        const payload = JSON.stringify(payloadObj);
+        const start = nowTimestamp;
+        const end = nowTimestamp + period;
+        const salt = nowTimestamp.toString();
+        const extraData = '0x';
         signTypedData({
             domain: {
                 name: "Spend Permission Manager",
@@ -90,15 +89,28 @@ export function SnipeMemeCoins({ budget, requestId }: Props) {
                 account: account.address,
                 spender,
                 token,
-                allowance,
-                period: period,
-                start: nowTimestamp,
-                end: nowTimestamp + period,
-                salt: BigInt(nowTimestamp),
-                extraData: '0x',
+                allowance: BigInt(allowance),
+                period,
+                start,
+                end,
+                salt: BigInt(salt),
+                extraData,
             },
         }, {
             onSuccess: async (data) => {
+                const payloadObj: Payload = {
+                    account: account.address as `0x${string}`,
+                    spender,
+                    token,
+                    allowance,
+                    period,
+                    start,
+                    end,
+                    salt,
+                    extraData,
+                    signature: data,
+                };
+                const payload = JSON.stringify(payloadObj);
                 const result = await fetch('/api/backgroundtask', {
                     method: 'POST',
                     body: JSON.stringify({
