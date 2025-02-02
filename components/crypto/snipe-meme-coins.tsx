@@ -141,8 +141,8 @@ export function SnipeMemeCoins({ budget, requestId }: Props) {
                     }
                 </span>
                 <br />
-                {fetchedTask.log?.trim().split('\n').map((logEntry) => (
-                    <span>
+                {fetchedTask.log?.trim().split('\n').map((logEntry, index) => (
+                    <span key={fetchedTask.id + "-" + index}>
                         {logEntry}.<br />
                     </span>
                 ))}
