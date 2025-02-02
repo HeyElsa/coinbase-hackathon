@@ -2,9 +2,9 @@ import 'server-only';
 import { BackgroundTask } from "@/lib/db/schema";
 import { getLatestMemeCoins } from "@/lib/integrations/dexscreener";
 import { privateKeyToAccount } from "viem/accounts";
-import { createWalletClient } from 'viem'
+import { createWalletClient, http } from 'viem';
+import { formatUnits } from 'viem';
 import { base } from 'viem/chains'
-import { http } from 'viem'
 import { Payload, spendPermissionAbi } from "@/lib/utils";
 import { updateBackgroundTaskStatus } from "@/lib/db/queries";
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
@@ -77,7 +77,7 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
             account: spender
         })
         console.log(approveHash);
-        log += "Approve Hash: " + approveHash + ";";
+        log += "Approving permission: " + approveHash + "\n";
         await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
 
         await new Promise(r => setTimeout(r, 10000));
@@ -93,7 +93,7 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
             account: spender
         });
         console.log(spendHash);
-        log += "Spend Hash: " + spendHash + ";";
+        log += "Spending balance: " + spendHash + "\n";
         await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
 
         await new Promise(r => setTimeout(r, 5000));
@@ -102,6 +102,7 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
         const totalCoins = selectedCoins.length;
         const totalAllowance = parseInt(payload.allowance);
         let amountWei = parseInt((totalAllowance / totalCoins).toFixed(0));
+        let amountEth = parseFloat(formatUnits(BigInt(amountWei), 18)).toFixed(6);
         let remainingAllowance = totalAllowance;
         for (let index = 0; index < totalCoins; index++) {
             const toAsset = selectedCoins[index];
@@ -115,21 +116,21 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
                 fromAssetId: Coinbase.assets.Wei,
                 toAssetId: toAsset.tokenAddress,
             });
-            log += `[${index + 1} of ${totalCoins}] Buying ${toAsset.symbol} with ${amountWei} Wei: ` + trade.getTransaction().getTransactionHash() + ";";
+            log += `[${index + 1} of ${totalCoins}] Buying ${toAsset.symbol} with ${amountEth} ETH: ` + trade.getTransaction().getTransactionHash() + "\n";
             await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
             const completedTrade = await trade.wait();
             const toAmount = parseInt(completedTrade.getToAmount().toString()) - 1;
-            log += "Completed Trade: " + toAmount + ` ${toAsset.symbol}` + " received" + ";";
+            log += "✅ Completed Trade: " + toAmount + ` ${toAsset.symbol}` + " received" + "\n";
             await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
             const transfer = await spenderWallet.createTransfer({
                 amount: toAmount,
                 assetId: toAsset.tokenAddress,
                 destination: payload.account
             });
-            log += `Transfering ${toAmount} ${toAsset.symbol} to ${payload.account}: ` + transfer.getTransactionHash() + ";";
+            log += `Transferring ${toAmount} ${toAsset.symbol} to ${payload.account}` + "\n";
             await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
             await transfer.wait();
-            log += "Completed Transfer: " + toAmount + ` ${toAsset.symbol} to ${payload.account}` + ";";
+            log += "✅ Completed Transfer: " + transfer.getTransactionHash() + "\n";
             await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
         }
         await updateBackgroundTaskStatus({ id: task.id, status: 'success', log });

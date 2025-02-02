@@ -133,12 +133,19 @@ export function SnipeMemeCoins({ budget, requestId }: Props) {
         return (
             <div>
                 <span>
-                    Task status: {fetchedTask.status}
+                    {
+                        (fetchedTask.status === 'pending' && 'Task is yet to be processed. Please wait for a few seconds.') ||
+                        (fetchedTask.status === 'running' && 'Task is under processing...') ||
+                        (fetchedTask.status === 'success' && '✅ Task finished successfully.') ||
+                        (fetchedTask.status === 'success' && '❌ Task failed.')
+                    }
                 </span>
                 <br />
-                <span>
-                    {fetchedTask.log?.replaceAll('.', '.\n')}
-                </span>
+                {fetchedTask.log?.trim().split('\n').map((logEntry) => (
+                    <span>
+                        {logEntry}.<br />
+                    </span>
+                ))}
             </div>
         )
     } else if (signature) {
