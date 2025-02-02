@@ -2,7 +2,7 @@
     "crons": [
         {
             "path": "/api/backgroundtask/cron",
-            "schedule": "* * * * *"
+            "schedule": "*/2 * * * *"
         }
     ]
 }
