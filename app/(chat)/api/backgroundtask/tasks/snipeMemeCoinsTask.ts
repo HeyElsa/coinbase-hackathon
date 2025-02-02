@@ -21,7 +21,6 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
         const payload: Payload = JSON.parse(task.payload);
         const privateKey = process.env.SPENDER_PRIVATE_KEY as `0x${string}`;
         const spender = privateKeyToAccount(privateKey);
-        console.log(process.env.SPENDER_SEED_PHRASE);
         Coinbase.configure({apiKeyName: process.env.CDK_API_KEY_NAME as string, privateKey: process.env.CDK_API_SECRET as string});
         const spenderWallet = await Wallet.import({ mnemonicPhrase: process.env.SPENDER_SEED_PHRASE as string }, Coinbase.networks.BaseMainnet);
         const spendPermissionManagerAddress = '0xf85210B21cC50302F477BA56686d2019dC9b67Ad';
@@ -51,7 +50,7 @@ export async function snipeMemeCoinsTask(task: BackgroundTask) {
         console.log(approveHash);
         log += "Approve Hash: " + approveHash + ".";
         await updateBackgroundTaskStatus({ id: task.id, status: 'running', log });
-        
+
         await new Promise(r => setTimeout(r, 10000));
 
         const spendHash = await client.writeContract({
