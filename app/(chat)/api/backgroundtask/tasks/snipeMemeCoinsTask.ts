@@ -1,12 +1,11 @@
-import 'server-only';
 import { updateBackgroundTaskStatus } from "@/lib/db/queries";
 import { BackgroundTask } from "@/lib/db/schema";
 import { getLatestMemeCoins } from "@/lib/integrations/dexscreener";
 import { Payload, spendPermissionAbi } from "@/lib/utils";
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
-import { createWalletClient, formatUnits, http } from 'viem';
+import { createWalletClient, formatUnits, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { base } from 'viem/chains';
+import { base } from "viem/chains";
 
 export async function snipeMemeCoinsTask(task: BackgroundTask) {
     var log = "";
