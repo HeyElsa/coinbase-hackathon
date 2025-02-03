@@ -51,14 +51,14 @@ export default function Page() {
         <AuthForm action={handleSubmit} defaultEmail={email}>
           <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
           <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
-            {"Don't have an account? "}
+            {"Registration is disabled now. Check out "}
             <Link
-              href="/register"
+              href="https://app.heyelsa.ai"
               className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
             >
-              Sign up
+              https://app.heyelsa.ai
             </Link>
-            {' for free.'}
+            {' instead.'}
           </p>
         </AuthForm>
       </div>
